@@ -11,7 +11,7 @@ The most obivious change should be the location, where the MODs/Extensions are s
 
 Each extension has it's own directory. However you can (and should) also use an additional vendor directory (with your author name or author-group name). So in case of my newspage the files will be in
 
-> phpBB/ext/**nickvergessen/newspage/**
+> phpBB/ext/nickvergessen/newspage/
 
 You should not need any files to be located outside of that directory. No matter which files, may it be styles, language or ACP module files. All of them will be moved into your extension's directory.
 
@@ -53,17 +53,17 @@ The string we define for `_controller` defines a service (`newspage.controller.m
 	services:
 	    newspage.controller.main:
 	        class: phpbb_ext_nickvergessen_newspage_controller_main
-        arguments:
-            - @auth
-            - @cache
-            - @config
-            - @dbal.conn
-            - @request
-            - @template
-            - @user
-            - @controller.helper
-            - %core.root_path%
-            - %core.php_ext%
+	        arguments:
+	            - @auth
+	            - @cache
+	            - @config
+	            - @dbal.conn
+	            - @request
+	            - @template
+	            - @user
+	            - @controller.helper
+	            - %core.root_path%
+	            - %core.php_ext%
 
 Any service that is previously defined in your file, or in the file of the phpBB core `phpBB/config/services.yml`, can also be used as an argument, aswell as some predefined string (like `core.root_path` here).
 
