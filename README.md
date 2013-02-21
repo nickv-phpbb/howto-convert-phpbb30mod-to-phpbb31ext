@@ -307,4 +307,29 @@ Now we add the function which is then called:
 			));
 		}
 
-and we are done with the php-editing. Your users will not get conflicts on searching for files blocks and other things because another MOD already edited the code.
+and we are done with the php-editing. Your users will not get conflicts on searching for files blocks and other things because another MOD already edited the code. Again like with the controllers, you can have multiple listeners in the event/ directory, aswell as subscribe to multiple events with one listener.
+
+### Template Event
+
+Now the only thing left is, adding the code to the html output. For templates you need one file per event.
+
+The filename thereby includes the event name. In order to add the newspage link next to the FAQ link, we need to use the `'overall_header_navigation_prepend'`-event (a full list of events can be found [here](https://wiki.phpbb.com/Event_List) ).
+
+So we add the `styles/prosilver/template/events/overall_header_navigation_prepend_listener.html` to our extensions directory and add the html code into it.
+
+	<li class="icon-newspage"><a href="{U_NEWSPAGE}">{L_NEWSPAGE}</a></li>
+
+And that's it. No file edits required for the template files aswell.
+
+### Adding Events
+
+You can also add events to your extensions php and template code. If you miss an event from the core, please post a topic into the [[3.x] Event Requests](https://area51.phpbb.com/phpBB/viewforum.php?f=111)-Forum and we will include it for the next release.
+We try to include a huge bunch of events by default, but surely we can not cover every place your MODs need to be covered.
+
+### Basics finished!
+
+And that's it, the 3.0 Modification was successfully converted into a 3.1 Extension.
+
+## Compatibility
+
+In some cases the compatibility of functions and classes count not be kept, while increasing their power. You can see a list of things in the Wiki-Article about [PhpBB3.1](https://wiki.phpbb.com/PhpBB3.1)
