@@ -23,6 +23,7 @@ You should not need any files to be located outside of that directory. No matter
 			adm/style/				| phpBB/adm/style/
 			config/					|	---
 			controller/				|	---
+			event/					|	---
 			language/				| phpBB/language/
 			migration/				|	---
 			styles/					| phpBB/styles/
@@ -235,3 +236,75 @@ As the language files in your extension are not detected by the `$user->add_lang
 	$user->add_lang_ext('nickvergessen/newspage', 'newspage');
 
 to load my language from `phpBB/ext/nickvergessen/newspage/language/en/newspage.php`
+
+## File edits - Better don't edit anything, just use Events and Listeners
+
+As for the newspage Modification, the only thing that is now missing from completion is the link in the header section, so you can start browsing the newspage.
+
+In order to do this, I used to define the template variable in the `page_header()`-function of phpBB and then edit the `overall_header.html`. But this is 3.1 so we don't like file edits anymore and added **events** instead. With events you can hook into several places and execute your code, without editing them.
+
+### php Events
+
+So instead of adding
+
+	$template->assign_vars(array(
+		'U_NEWSPAGE'	=> append_sid($phpbb_root_path . 'newspage.' . $phpEx),
+	));
+
+to the `page_header()`, we put that into an event listener, which is then called, everytime `page_header()` itself is called.
+
+So we add the **event/main_listener.php** file to our extension, which implements some Symfony class:
+
+	<?php
+	
+	/**
+	*
+	* @package NV Newspage Extension
+	* @copyright (c) 2013 nickvergessen
+	* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
+	*
+	*/
+	
+	/**
+	* @ignore
+	*/
+	
+	if (!defined('IN_PHPBB'))
+	{
+		exit;
+	}
+	
+	/**
+	* Event listener
+	*/
+	use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+	
+	class phpbb_ext_nickvergessen_newspage_event_main_listener implements EventSubscriberInterface
+	{
+	}
+
+In the `getSubscribedEvents()` method we tell the system for which events we want to get notified and which function should be executed in case it's called. In our case we want to subscribe to the `core.page_header`-Event (a full list of events can be found [here](https://wiki.phpbb.com/Event_List) ):
+
+		static public function getSubscribedEvents()
+		{
+			return array(
+				'core.page_header'				=> 'add_page_header_link',
+			);
+		}
+
+Now we add the function which is then called:
+
+		public function add_page_header_link($event)
+		{
+			global $user, $template, $phpbb_root_path, $phpEx;
+	
+			// I use a second language file here, so I only load the strings global which are required globally.
+			// This includes the name of the link, aswell as the ACP module names.
+			$user->add_lang_ext('nickvergessen/newspage', 'newspage_global');
+
+			$template->assign_vars(array(
+				'U_NEWSPAGE'	=> append_sid($phpbb_root_path . 'app.' . $phpEx, 'controller=newspage/'),
+			));
+		}
+
+and we are done with the php-editing. Your users will not get conflicts on searching for files blocks and other things because another MOD already edited the code.
