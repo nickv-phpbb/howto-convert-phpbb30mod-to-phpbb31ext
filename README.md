@@ -145,7 +145,7 @@ In this example my **controller/main.php** would look like the following:
 			*						- phpBB/styles/<style_name>/template/
 			*						- phpBB/ext/<all_active_extensions>/styles/<style_name>/template/
 			* @param	string		Page title
-			* @param	int			Status code of the page (200 - OK [ default ], 403 - Unauthorized, 404 - Page not found)
+			* @param	int			Status code of the page (200 - OK [ default ], 403 - Unauthorized, 404 - Page not found, etc.)
 			*/
 			return $this->helper->render('newspage_body.html');
 		}
@@ -154,3 +154,76 @@ In this example my **controller/main.php** would look like the following:
 You can also have multiple different methods in one controller aswell as having multiple controllers, in order to organize your code a bit better.
 
 If we now add the entry for our extension into the phpbb_ext table, and go to `example.tld/app.php?controller=newspage/` you can see your template file. **Congratulations!** You just finished the "Hello World" example for phpBB Extensions. ;)
+
+### ACP Modules
+
+This section also applies to MCP and UCP modules.
+
+As mentioned before these files are also moved into your extensions directory. The info-file, currently located in `phpBB/includes/acp/info/acp_newspage.php`, is going to be `ext/nickvergessen/newspage/acp/main_info.php` and the module itself is moved from `phpBB/includes/acp/acp_newspage.php` to `ext/nickvergessen/newspage/acp/main_module.php`. In order to be able to automatically load the files by their class names we need to make some little adjustments to the classes themselves.
+
+As for the `main_info.php` I need to adjust the class name from `acp_newspage_info` to `phpbb_ext_nickvergessen_newspage_acp_main_info` and also change the value of `'filename'` in the returned array.
+
+	<?php
+	
+	/**
+	*
+	* @package NV Newspage Extension
+	* @copyright (c) 2013 nickvergessen
+	* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
+	*
+	*/
+	
+	/**
+	* @ignore
+	*/
+	if (!defined('IN_PHPBB'))
+	{
+		exit;
+	}
+	
+	class phpbb_ext_nickvergessen_newspage_acp_main_info
+	{
+		function module()
+		{
+			return array(
+				'filename'	=> 'main_module',
+				'title'		=> 'ACP_NEWSPAGE_TITLE',
+				'version'	=> '1.0.1',
+				'modes'		=> array(
+					'config_newspage'	=> array('title' => 'ACP_NEWSPAGE_CONFIG', 'auth' => 'acl_a_board', 'cat' => array('ACP_NEWSPAGE_TITLE')),
+				),
+			);
+		}
+	}
+
+In case of the module, I just adjust the class name:
+
+	<?php
+	
+	/**
+	*
+	* @package NV Newspage Extension
+	* @copyright (c) 2013 nickvergessen
+	* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
+	*
+	*/
+	
+	/**
+	* @ignore
+	*/
+	if (!defined('IN_PHPBB'))
+	{
+		exit;
+	}
+	
+	class phpbb_ext_nickvergessen_newspage_acp_main_module
+	{
+		var $u_action;
+	
+		function main($id, $mode)
+		{
+			// Your magic stuff here
+		}
+	}
+
+And there you go. Your Extensions ACP module can now be added through the ACP and you just finished another step of successfully converting a MOD into an Extension.
