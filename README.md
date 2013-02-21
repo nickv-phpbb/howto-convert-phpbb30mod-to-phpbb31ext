@@ -333,3 +333,34 @@ And that's it, the 3.0 Modification was successfully converted into a 3.1 Extens
 ## Compatibility
 
 In some cases the compatibility of functions and classes count not be kept, while increasing their power. You can see a list of things in the Wiki-Article about [PhpBB3.1](https://wiki.phpbb.com/PhpBB3.1)
+
+### Pagination
+
+When you use your old 3.0 code you will receive an error like the following:
+
+> Fatal error: Call to undefined function generate_pagination() in ...\phpBB3\ext\nickvergessen\newspage\controller\main.php on line 534
+
+The problem is, that the pagination is now not returned by the function anymore, but instead automatically put into the template. In the same step, the function name was updated with a phpbb-prefix.
+
+The old pagination code was similar to:
+
+		$pagination = generate_pagination(append_sid("{$phpbb_root_path}app.$phpEx", 'controller=newspage/'), $total_paginated, $config['news_number'], $start);
+	
+		$this->template->assign_vars(array(
+			'PAGINATION'		=> $pagination,
+			'PAGE_NUMBER'		=> on_page($total_paginated, $config['news_number'], $start),
+			'TOTAL_NEWS'		=> $this->user->lang('VIEW_TOPIC_POSTS', $total_paginated),
+		));
+
+The new code should look like:
+
+
+		$base_url = append_sid("{$phpbb_root_path}app.$phpEx", 'controller=newspage/');
+		phpbb_generate_template_pagination($this->template, $base_url, 'pagination', 'start', $total_paginated, $this->config['news_number'], $start);
+
+		$this->template->assign_vars(array(
+			'PAGE_NUMBER'		=> phpbb_on_page($this->template, $this->user, $base_url, $total_paginated, $this->config['news_number'], $start),
+			'TOTAL_NEWS'		=> $this->user->lang('VIEW_TOPIC_POSTS', $total_paginated),
+		));
+
+
