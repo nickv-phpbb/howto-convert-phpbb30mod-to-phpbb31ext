@@ -248,7 +248,7 @@ In order to do this, I used to define the template variable in the `page_header(
 So instead of adding
 
 	$template->assign_vars(array(
-		'U_NEWSPAGE'	=> append_sid($phpbb_root_path . 'newspage.' . $phpEx),
+		'U_NEWSPAGE'	=> append_sid($phpbb_root_path . 'app.' . $phpEx, 'controller=newspage/'),
 	));
 
 to the `page_header()`, we put that into an event listener, which is then called, everytime `page_header()` itself is called.
