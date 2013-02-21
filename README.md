@@ -227,3 +227,11 @@ In case of the module, I just adjust the class name:
 	}
 
 And there you go. Your Extensions ACP module can now be added through the ACP and you just finished another step of successfully converting a MOD into an Extension.
+
+## Include extension's language files
+
+As the language files in your extension are not detected by the `$user->add_lang()` any more, you need to use the `$user->add_lang_ext()` method. This method takes two arguments, the first one is the fullname of the extension (including the vendor) and the second one is the file name or array of file names. so in order to load my newspage language file I now call
+
+	$user->add_lang_ext('nickvergessen/newspage', 'newspage');
+
+to load my language from `phpBB/ext/nickvergessen/newspage/language/en/newspage.php`
