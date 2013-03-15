@@ -3,6 +3,32 @@
 
 This guide should give a quick overview of the needed tasks to MOD-Authors for converting a phpBB 3.0 MOD to a phpBB 3.1 Extension, using NV Newspage as an example.
 
+## Table of Contents
+
+* ##[Extension Structure](#extension-structure)
+	+ [Directory](#directory)
+	+ [Front-facing files, routes and services](#front-facing-files-routes-and-services)
+	+ [ACP Modules](#acp-modules)
+
+
+* ##[Database Changes](#database-changes-umil-replaced-by-migrations)
+UMIL replaced by Migrations
+	+ [Schema Changes](#schema-changes)
+	+ [Data Changes](#data-changes)
+	+ [Dependencies](#dependencies-and-finishing-up-migrations)
+
+* ##[Include extension's language files](#include-extensions-language-files)
+
+* ##[File edits](#file-edits---better-dont-edit-anything-just-use-events-and-listeners)
+Better don't edit anything, just use Events and Listeners
+	+ [php Events](#php-events)
+	+ [Template Events](#template-events)
+	+ [Adding Events](#adding-events)
+
+* ##[Compatibility](#compatibility)
+	+ [Pagination](#pagination)
+
+
 ## Extension Structure
 
 The most obvious change should be the location the MODs/Extensions are stored in 3.1. In phpBB 3.0 all files were put into the core's root folder. In version 3.1 a special directory for Extensions has been created. It's called **ext/**.
@@ -271,7 +297,7 @@ Basically migrations to the same as your 3.0 UMIL files. It performs the databas
 		),
 	);
 
-### Schema changes
+### Schema Changes
 
 The newspage does not have any database schema changes, so I will use the Example from the [Wiki](https://wiki.phpbb.com/Migrations/Schema_Changes). Basically you need to have two methods in your migration class file: 
 
