@@ -25,7 +25,7 @@ There should not be a need to have files located outside of that direcotiry. No 
 			controller/				|	---
 			event/					|	---
 			language/				| phpBB/language/
-			migration/				|	---
+			migrations/				|	---
 			styles/					| phpBB/styles/
 
 Newly added, additional directories have already been listed. Their use will be explained in the following paragraphs.
@@ -228,6 +228,207 @@ In case of the module, I just adjust the class name:
 	}
 
 And there you go. Your Extensions ACP module can now be added through the ACP and you just finished another step of successfully converting a MOD into an Extension.
+
+## Database Changes, UMIL replaced by Migrations
+
+[Wiki/Migrations](https://wiki.phpbb.com/Migrations)
+
+Basically migrations to the same as your 3.0 UMIL files. It performs the database changes of your MOD/Extension. The biggest difference between migrations and UMIL hereby is, that while you had one file with one array in UMIL for all your changes, you have one file per version in Migrations. But let's have a look at the newspage again.
+
+	$versions = array(
+		'1.0.0'	=> array(
+			'config_add' => array(
+				array('news_number', 5),
+				array('news_forums', '0'),
+				array('news_char_limit', 500),
+				array('news_user_info', 1),
+				array('news_post_buttons', 1),
+			),
+			'module_add' => array(
+				array('acp', 'ACP_CAT_DOT_MODS', 'NEWS'),
+
+				array('acp', 'NEWS', array(
+						'module_basename'	=> 'newspage',
+						'module_langname'	=> 'NEWS_CONFIG',
+						'module_mode'		=> 'overview',
+						'module_auth'		=> 'acl_a_board',
+					),
+				),
+			),
+		),
+		'1.0.1'	=> array(
+			'config_add' => array(
+				array('news_pages', 1),
+			),
+		),
+		'1.0.2'	=> array(),
+		'1.0.3' => array(
+			'config_add' => array(
+				array('news_attach_show', 1),
+				array('news_cat_show', 1),
+				array('news_archive_per_year', 1),
+			),
+		),
+	);
+
+### Schema changes
+
+The newspage does not have any database schema changes, so I will use the Example from the [Wiki](https://wiki.phpbb.com/Migrations/Schema_Changes). Basically you need to have two methods in your migration class file: 
+
+	public function update_schema()
+
+and 
+
+	public function revert_schema()
+
+whereby both methods return an array with the changes:
+
+	public function update_schema()
+	{
+		return array(
+			'add_columns'        => array(
+				$this->table_prefix . 'groups'        => array(
+					'group_teampage'    => array('UINT', 0, 'after' => 'group_legend'),
+				),
+				$this->table_prefix . 'profile_fields'    => array(
+					'field_show_on_pm'        => array('BOOL', 0),
+				),
+			),
+			'change_columns'    => array(
+				$this->table_prefix . 'groups'        => array(
+					'group_legend'        => array('UINT', 0),
+				),
+			),
+		);
+	}
+
+	public function revert_schema()
+	{
+		return array(
+			'drop_columns'        => array(
+				$this->table_prefix . 'groups'        => array(
+					'group_teampage',
+				),
+				$this->table_prefix . 'profile_fields'    => array(
+					'field_show_on_pm',
+				),
+			),
+			'change_columns'    => array(
+				$this->table_prefix . 'groups'        => array(
+					'group_legend'        => array('BOOL', 0),
+				),
+			),
+		);
+	}
+
+The `revert_schema()` should thereby revert all changes made by the `update_schema()`.
+
+### Data Changes
+
+The data changes, like adding modules, permissions and configs, are provided with the `update_data()` function.
+
+This function returns an array aswell. The example for the 1.0.0 version update from the newspage would look like the following:
+
+	public function update_data()
+	{
+		return array(
+			array('config.add', array('news_number', 5)),
+			array('config.add', array('news_forums', '0')),
+			array('config.add', array('news_char_limit', 500)),
+			array('config.add', array('news_user_info', 1)),
+			array('config.add', array('news_post_buttons', 1)),
+
+			array('module.add', array(
+				'acp',
+				'ACP_CAT_DOT_MODS',
+				'ACP_NEWSPAGE_TITLE'
+			)),
+			array('module.add', array(
+				'acp',
+				'ACP_NEWSPAGE_TITLE',
+				array(
+					'module_basename'	=> 'phpbb_ext_nickvergessen_newspage_acp_main_module',
+					'modes'				=> array('config_newspage'),
+				),
+			)),
+
+			array('config.add', array('newspage_mod_version', '1.0.0')),
+		);
+	}
+
+More information about these data update tools can be found on the Wiki [Migrations/Tools](https://wiki.phpbb.com/Migrations/Tools).
+
+### Dependencies and finishing up migrations
+
+Now there are only two things left, your migration file needs. The first thing is a check, which allows phpbb to see whether the migration is already installed, although it did not run yet (f.e. when updating from a 3.0 MOD to a 3.1 Extension).
+
+The easiest way for this to check, could be the version of the MOD, but when you add columns to tables, you can also check whether they exist:
+
+	public function effectively_installed()
+	{
+		return isset($this->config['newspage_mod_version']) && version_compare($this->config['newspage_mod_version'], '1.0.0', '>=');
+	}
+
+As the migration files can have almost any name, phpBB might be unable to sort your migration files correctly. To avoid this problem, you can define a set of dependencies which must be installed before your migration can be installed. phpBB will try to install them, before installing your migration. If they can not be found or installed, your installation will fail aswell. For the 1.0.0 migration I will only require the `3.1-dev` Migration:
+
+	static public function depends_on()
+	{
+		return array('phpbb_db_migration_data_310_dev');
+	}
+
+All further updates can now require this Migration and so also require the 3.1-dev Migration.
+
+A complete file could look like this:
+
+	<?php
+	/**
+	*
+	* @package migration
+	* @copyright (c) 2013 phpBB Group
+	* @license http://opensource.org/licenses/gpl-license.php GNU Public License v2
+	*
+	*/
+
+	class phpbb_ext_nickvergessen_newspage_migrations_1_0_0 extends phpbb_db_migration
+	{
+		public function effectively_installed()
+		{
+			return isset($this->config['newspage_mod_version']) && version_compare($this->config['newspage_mod_version'], '1.0.0', '>=');
+		}
+
+		static public function depends_on()
+		{
+			return array('phpbb_db_migration_data_310_dev');
+		}
+
+		public function update_data()
+		{
+			return array(
+				array('config.add', array('news_number', 5)),
+				array('config.add', array('news_forums', '0')),
+				array('config.add', array('news_char_limit', 500)),
+				array('config.add', array('news_user_info', 1)),
+				array('config.add', array('news_post_buttons', 1)),
+
+				array('module.add', array(
+					'acp',
+					'ACP_CAT_DOT_MODS',
+					'ACP_NEWSPAGE_TITLE'
+				)),
+				array('module.add', array(
+					'acp',
+					'ACP_NEWSPAGE_TITLE',
+					array(
+						'module_basename'	=> 'phpbb_ext_nickvergessen_newspage_acp_main_module',
+						'modes'				=> array('config_newspage'),
+					),
+				)),
+
+				array('config.add', array('newspage_mod_version', '1.0.0')),
+			);
+		}
+	}
+
 
 ## Include extension's language files
 
