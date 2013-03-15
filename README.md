@@ -1,19 +1,19 @@
 # How to convert a phpBB 3.0 MOD into a phpBB 3.1 Extension
 
 
-This guide should give a quick overview on the tasks for MOD-Authors in order to make a 3.0 MOD running as a 3.1 Ext, taking NV Newspage as an example.
+This guide should give a quick overview of the needed tasks to MOD-Authors for converting a phpBB 3.0 MOD to a phpBB 3.1 Extension, using NV Newspage as an example.
 
 ## Extension Structure
 
-The most obivious change should be the location, where the MODs/Extensions are stored in 3.1. In phpBB 3.0 you just put all the files into the core's root folder. As for 3.1 we created a special directory for Extensions. It's called **ext/**.
+The most obvious change should be the location the MODs/Extensions are stored in 3.1. In phpBB 3.0 all files were put into the core's root folder. In version 3.1 a special directory for Extensions has been created. It's called **ext/**.
 
 ### Directory
 
-Each extension has it's own directory. However you can (and should) also use an additional vendor directory (with your author name or author-group name). So in case of my newspage the files will be in
+Each extension has its own directory. However, you can (and should) also use an additional vendor directory (with your author name or author-group name). In case of my newspage the files will be in
 
 > phpBB/ext/nickvergessen/newspage/
 
-You should not need any files to be located outside of that directory. No matter which files, may it be styles, language or ACP module files. All of them will be moved into your extension's directory.
+There should not be a need to have files located outside of that direcotiry. No matter which files, may it be styles, language or ACP module files. All of them will be moved into your extension's directory.
 
 			new directory			| current directory
 			------------------------+----------------
@@ -28,7 +28,7 @@ You should not need any files to be located outside of that directory. No matter
 			migration/				|	---
 			styles/					| phpBB/styles/
 
-I already listed some additional new directories here which will be explained later.
+Newly added, additional directories have already been listed. Their use will be explained in the following paragraphs.
 
 ### Front-facing files, routes and services
 
