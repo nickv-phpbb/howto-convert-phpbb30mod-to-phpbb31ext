@@ -213,7 +213,7 @@ As for the `main_info.php` I need to adjust the class name from `acp_newspage_in
 		function module()
 		{
 			return array(
-				'filename'	=> 'main_module',
+				'filename'	=> 'phpbb_ext_nickvergessen_newspage_acp_main_module',
 				'title'		=> 'ACP_NEWSPAGE_TITLE',
 				'version'	=> '1.0.1',
 				'modes'		=> array(
