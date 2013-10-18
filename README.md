@@ -58,7 +58,7 @@ Newly added, additional directories have already been listed. Their use will be 
 
 ### Front-facing files, routes and services
 
-While in 3.0 you just created a new file in the root directory of phpBB, you might want to use the new controller system of 3.1 in future. Your links change from something like `phpBB/newspage.php` to `phpBB/app.php?controller=newspage` in first place, but with a little htaccess rule this can be rewritten to `phpBB/newspage`
+While in 3.0 you just created a new file in the root directory of phpBB, you might want to use the new controller system of 3.1 in future. Your links change from something like `phpBB/newspage.php` to `phpBB/app.php/newspage` in first place, but with a little htaccess rule this can be rewritten to `phpBB/newspage`
 
 In order to link a specific routing rule to your extension, you need to define the route in your extension's **config/routing.yml**
 
@@ -79,7 +79,7 @@ The string we define for `_controller` defines a service (`nickvergessen.newspag
 
 	services:
 	    nickvergessen.newspage.controller:
-	        class: phpbb_ext_nickvergessen_newspage_controller_main
+	        class: nickvergessen\newspage\controller\main
 	        arguments:
 	            - @auth
 	            - @cache
@@ -94,7 +94,7 @@ The string we define for `_controller` defines a service (`nickvergessen.newspag
 
 Any service that is previously defined in your file, or in the file of the phpBB core `phpBB/config/services.yml`, can also be used as an argument, aswell as some predefined string (like `core.root_path` here).
 
-**NOTE:** The classes from phpBB/ext/ are automatically loaded by their names, whereby underscored ( _ ) can represent directories. In this case the class `phpbb_ext_nickvergessen_newspage_controller_main` would be located in `phpBB/ext/nickvergessen/newspage/controller/main.php`
+**NOTE:** The classes from phpBB/ext/ are automatically loaded by their namespace and class names, whereby backslash ( `\` ) represent directories. In this case the class `nickvergessen\newspage\controller\main` would be located in `phpBB/ext/nickvergessen/newspage/controller/main.php`
 
 For more explanations about [Routing](http://symfony.com/doc/2.1/book/routing.html) and  [Services](http://symfony.com/doc/2.1/book/service_container.html) see the Symfony 2.1 Documentation.
 
@@ -110,45 +110,30 @@ In this example my **controller/main.php** would look like the following:
 	*
 	*/
 	
-	class phpbb_ext_nickvergessen_newspage_controller_main
+	namespace nickvergessen\newspage\controller;
+
+	class main
 	{
 		/**
 		* Constructor
 		* NOTE: The parameters of this method must match in order and type with
 		* the dependencies defined in the services.yml file for this service.
 		*
-		* @param phpbb_auth		$auth		Auth object
-		* @param phpbb_cache_service	$cache		Cache object
-		* @param phpbb_config	$config		Config object
-		* @param phpbb_db_driver	$db		Database object
-		* @param phpbb_request	$request	Request object
-		* @param phpbb_template	$template	Template object
-		* @param phpbb_user		$user		User object
-		* @param phpbb_controller_helper		$helper		Controller helper object
+		* @param \phpbb\config	$config		Config object
+		* @param \phpbb\template	$template	Template object
+		* @param \phpbb\user	$user		User object
+		* @param \phpbb\controller\helper		$helper				Controller helper object
 		* @param string			$root_path	phpBB root path
 		* @param string			$php_ext	phpEx
 		*/
-		public function __construct(phpbb_auth $auth, phpbb_cache_service $cache, phpbb_config $config, phpbb_db_driver $db, phpbb_request $request, phpbb_template $template, phpbb_user $user, phpbb_controller_helper $helper, $root_path, $php_ext)
+		public function __construct(\phpbb\config\config $config, \phpbb\template\template $template, \phpbb\user $user, \phpbb\controller\helper $helper, $root_path, $php_ext)
 		{
-			$this->auth = $auth;
-			$this->cache = $cache;
 			$this->config = $config;
-			$this->db = $db;
-			$this->request = $request;
 			$this->template = $template;
 			$this->user = $user;
 			$this->helper = $helper;
 			$this->root_path = $root_path;
 			$this->php_ext = $php_ext;
-	
-			if (!class_exists('bbcode'))
-			{
-				include($this->root_path . 'includes/bbcode.' . $this->php_ext);
-			}
-			if (!function_exists('get_user_rank'))
-			{
-				include($this->root_path . 'includes/functions_display.' . $this->php_ext);
-			}
 		}
 	
 		/**
@@ -180,7 +165,7 @@ In this example my **controller/main.php** would look like the following:
 
 You can also have multiple different methods in one controller aswell as having multiple controllers, in order to organize your code a bit better.
 
-If we now add the entry for our extension into the phpbb_ext table, and go to `example.tld/app.php?controller=newspage/` you can see your template file. **Congratulations!** You just finished the "Hello World" example for phpBB Extensions. ;)
+If we now add the entry for our extension into the phpbb_ext table, and go to `example.tld/app.php/newspage/` you can see your template file. **Congratulations!** You just finished the "Hello World" example for phpBB Extensions. ;)
 
 ### ACP Modules
 
@@ -188,7 +173,7 @@ This section also applies to MCP and UCP modules.
 
 As mentioned before these files are also moved into your extensions directory. The info-file, currently located in `phpBB/includes/acp/info/acp_newspage.php`, is going to be `ext/nickvergessen/newspage/acp/main_info.php` and the module itself is moved from `phpBB/includes/acp/acp_newspage.php` to `ext/nickvergessen/newspage/acp/main_module.php`. In order to be able to automatically load the files by their class names we need to make some little adjustments to the classes themselves.
 
-As for the `main_info.php` I need to adjust the class name from `acp_newspage_info` to `phpbb_ext_nickvergessen_newspage_acp_main_info` and also change the value of `'filename'` in the returned array.
+As for the `main_info.php` I need to adjust the class name from `acp_newspage_info` to `main_info` and also change the value of `'filename'` in the returned array.
 
 	<?php
 	
@@ -207,13 +192,15 @@ As for the `main_info.php` I need to adjust the class name from `acp_newspage_in
 	{
 		exit;
 	}
+
+	namespace nickvergessen\newspage\acp;
 	
-	class phpbb_ext_nickvergessen_newspage_acp_main_info
+	class main_info
 	{
 		function module()
 		{
 			return array(
-				'filename'	=> 'main_module',
+				'filename'	=> '\nickvergessen\newspage\acp\main_module',
 				'title'		=> 'ACP_NEWSPAGE_TITLE',
 				'version'	=> '1.0.1',
 				'modes'		=> array(
@@ -242,8 +229,10 @@ In case of the module, I just adjust the class name:
 	{
 		exit;
 	}
-	
-	class phpbb_ext_nickvergessen_newspage_acp_main_module
+
+	namespace nickvergessen\newspage\acp;
+
+	class main_module
 	{
 		var $u_action;
 	
@@ -373,7 +362,7 @@ This function returns an array aswell. The example for the 1.0.0 version update 
 				'acp',
 				'ACP_NEWSPAGE_TITLE',
 				array(
-					'module_basename'	=> 'phpbb_ext_nickvergessen_newspage_acp_main_module',
+					'module_basename'	=> '\nickvergessen\newspage\acp\main_module',
 					'modes'				=> array('config_newspage'),
 				),
 			)),
@@ -395,14 +384,14 @@ The easiest way for this to check, could be the version of the MOD, but when you
 		return isset($this->config['newspage_mod_version']) && version_compare($this->config['newspage_mod_version'], '1.0.0', '>=');
 	}
 
-As the migration files can have almost any name, phpBB might be unable to sort your migration files correctly. To avoid this problem, you can define a set of dependencies which must be installed before your migration can be installed. phpBB will try to install them, before installing your migration. If they can not be found or installed, your installation will fail aswell. For the 1.0.0 migration I will only require the `3.1-dev` Migration:
+As the migration files can have almost any name, phpBB might be unable to sort your migration files correctly. To avoid this problem, you can define a set of dependencies which must be installed before your migration can be installed. phpBB will try to install them, before installing your migration. If they can not be found or installed, your installation will fail aswell. For the 1.0.0 migration I will only require the `3.1.0-a1` Migration:
 
 	static public function depends_on()
 	{
-		return array('phpbb_db_migration_data_310_dev');
+		return array('\phpbb\db\migration\data\v310\alpha1');
 	}
 
-All further updates can now require this Migration and so also require the 3.1-dev Migration.
+All further updates can now require this Migration and so also require the 3.1.0-a1 Migration.
 
 A complete file could look like this:
 
@@ -415,7 +404,9 @@ A complete file could look like this:
 	*
 	*/
 
-	class phpbb_ext_nickvergessen_newspage_migrations_1_0_0 extends phpbb_db_migration
+	namespace nickvergessen\newspage\migrations\v10x;
+
+	class release_1_0_0 extends \phpbb\db\migration\migration
 	{
 		public function effectively_installed()
 		{
@@ -445,7 +436,7 @@ A complete file could look like this:
 					'acp',
 					'ACP_NEWSPAGE_TITLE',
 					array(
-						'module_basename'	=> 'phpbb_ext_nickvergessen_newspage_acp_main_module',
+						'module_basename'	=> '\nickvergessen\newspage\acp\main_module',
 						'modes'				=> array('config_newspage'),
 					),
 				)),
@@ -500,13 +491,15 @@ So we add the **event/main_listener.php** file to our extension, which implement
 	{
 		exit;
 	}
+
+	namespace nickvergessen\newspage\event;
 	
 	/**
 	* Event listener
 	*/
 	use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 	
-	class phpbb_ext_nickvergessen_newspage_event_main_listener implements EventSubscriberInterface
+	class main_listener implements EventSubscriberInterface
 	{
 	}
 
@@ -515,22 +508,34 @@ In the `getSubscribedEvents()` method we tell the system for which events we wan
 		static public function getSubscribedEvents()
 		{
 			return array(
+				'core.user_setup'				=> 'load_language_on_setup',
 				'core.page_header'				=> 'add_page_header_link',
 			);
 		}
 
 Now we add the function which is then called:
 
+
+		public function load_language_on_setup($event)
+		{
+			$lang_set_ext = $event['lang_set_ext'];
+			$lang_set_ext[] = array(
+				'ext_name' => 'nickvergessen/newspage',
+				'lang_set' => 'newspage',
+			);
+			$event['lang_set_ext'] = $lang_set_ext;
+		}
+
 		public function add_page_header_link($event)
 		{
-			global $user, $template, $phpbb_root_path, $phpEx;
+			global $user, $template, $phpbb_container;
 	
 			// I use a second language file here, so I only load the strings global which are required globally.
 			// This includes the name of the link, aswell as the ACP module names.
 			$user->add_lang_ext('nickvergessen/newspage', 'newspage_global');
 
 			$template->assign_vars(array(
-				'U_NEWSPAGE'	=> append_sid($phpbb_root_path . 'app.' . $phpEx, 'controller=newspage/'),
+				'U_NEWSPAGE'	=> $phpbb_container->get('controller.helper')->url('newspage'),
 			));
 		}
 
@@ -542,7 +547,7 @@ Now the only thing left is, adding the code to the html output. For templates yo
 
 The filename thereby includes the event name. In order to add the newspage link next to the FAQ link, we need to use the `'overall_header_navigation_prepend'`-event (a full list of events can be found [here](https://wiki.phpbb.com/Event_List) ).
 
-So we add the `styles/prosilver/template/events/overall_header_navigation_prepend_listener.html` to our extensions directory and add the html code into it.
+So we add the `styles/prosilver/template/event/overall_header_navigation_prepend_listener.html` to our extensions directory and add the html code into it.
 
 	<li class="icon-newspage"><a href="{U_NEWSPAGE}">{L_NEWSPAGE}</a></li>
 
@@ -582,8 +587,8 @@ The old pagination code was similar to:
 The new code should look like:
 
 
-		$base_url = append_sid("{$phpbb_root_path}app.$phpEx", 'controller=newspage/');
-		phpbb_generate_template_pagination($this->template, $base_url, 'pagination', 'start', $total_paginated, $this->config['news_number'], $start);
+		$base_url = $this->helper->url('newspage');
+		phpbb_generate_template_pagination($this->template, $base_url, 'pagination', '/page/%d', $total_paginated, $this->config['news_number'], $start);
 
 		$this->template->assign_vars(array(
 			'PAGE_NUMBER'		=> phpbb_on_page($this->template, $this->user, $base_url, $total_paginated, $this->config['news_number'], $start),
