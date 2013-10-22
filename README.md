@@ -7,6 +7,7 @@ This guide should give a quick overview of the needed tasks to MOD-Authors for c
 
 * ##[Extension Structure](#extension-structure)
 	+ [Directory](#directory)
+	+ [Important new files](#important-new-files)
 	+ [Front-facing files, routes and services](#front-facing-files-routes-and-services)
 	+ [ACP Modules](#acp-modules)
 
@@ -55,6 +56,53 @@ There should not be a need to have files located outside of that direcotiry. No 
 			styles/					| phpBB/styles/
 
 Newly added, additional directories have already been listed. Their use will be explained in the following paragraphs.
+
+### Important new files
+
+There is a new file, your extension needs, in order to be recognized by the system. It's called `composer.json`:
+it specifies the requirements of your extension aswell as some author information. The layout is a simple json array, the keys should really explain enough.
+**Note:** you must not change the `type` element.
+In the `require` section you can also specify other extensions which are required in order to install this one. (*Validation for this is not yet implemented, but will be in 3.1.0*)
+
+	{
+		"name": "nickvergessen/newspage",
+		"type": "phpbb-extension",
+		"description": "Adds a extra-page to the board where a switchable number of news are displayed. The text can be shorten to a certain number of chars. Also the Icons can be switched of (post icons, user icons)",
+		"homepage": "https://github.com/nickvergessen/phpbb3-mod-newspage",
+		"version": "1.1.0",
+		"time": "2013-03-16",
+		"licence": "GPL-2.0",
+		"authors": [
+			{
+				"name": "Joas Schilling",
+				"email": "nickvergessen@gmx.de",
+				"homepage": "http://www.flying-bits.org",
+				"role": "Lead Developer"
+			}
+		],
+		"require": {
+			"php": ">=5.3",
+			"phpbb/phpbb": "3.1.*@dev"
+		},
+		"extra": {
+			"display-name": "phpBB 3.1 NV Newspage Extension"
+		}
+	}
+
+The second new file is called `ext.php`. It can be used to extend the functionality while install/uninstalling your extension:
+
+	<?php
+	
+	// this file is not really needed, when empty it can be ommitted
+	// however you can override the default methods and add custom
+	// installation logic
+	
+	namespace nickvergessen\newspage;
+	
+	class ext extends \phpbb\extension\base
+	{
+	}
+
 
 ### Front-facing files, routes and services
 
