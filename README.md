@@ -549,6 +549,15 @@ So we add the **event/main_listener.php** file to our extension, which implement
 	
 	class main_listener implements EventSubscriberInterface
 	{
+		/**
+		* Instead of using "global $user;" in the function, we use dependencies again.
+		*/
+		public function __construct(\phpbb\controller\helper $helper, \phpbb\template\template $template, \phpbb\user $user)
+		{
+			$this->helper = $helper;
+			$this->template = $template;
+			$this->user = $user;
+		}
 	}
 
 In the `getSubscribedEvents()` method we tell the system for which events we want to get notified and which function should be executed in case it's called. In our case we want to subscribe to the `core.page_header`-Event (a full list of events can be found [here](https://wiki.phpbb.com/Event_List) ):
@@ -576,18 +585,30 @@ Now we add the function which is then called:
 
 		public function add_page_header_link($event)
 		{
-			global $user, $template, $phpbb_container;
-	
 			// I use a second language file here, so I only load the strings global which are required globally.
 			// This includes the name of the link, aswell as the ACP module names.
-			$user->add_lang_ext('nickvergessen/newspage', 'newspage_global');
+			$this->user->add_lang_ext('nickvergessen/newspage', 'newspage_global');
 
-			$template->assign_vars(array(
-				'U_NEWSPAGE'	=> $phpbb_container->get('controller.helper')->url('newspage'),
+			$this->template->assign_vars(array(
+				'U_NEWSPAGE'	=> $this->helper->url('newspage'),
 			));
 		}
 
-and we are done with the php-editing. Your users will not get conflicts on searching for files blocks and other things because another MOD already edited the code. Again like with the controllers, you can have multiple listeners in the event/ directory, aswell as subscribe to multiple events with one listener.
+As a last step we need to register the event listener to the system.
+This is done using the `event.listener` tag in the service.yml:
+
+    nickvergessen.newspage.listener:
+        class: nickvergessen\newspage\event\main_listener
+        arguments:
+            - @controller.helper
+            - @template
+            - @user
+        tags:
+            - { name: event.listener }
+
+After this is added, your listener gets called and we are done with the php-editing. 
+
+Your users will not get conflicts on searching for files blocks and other things because another MOD already edited the code. Again like with the controllers, you can have multiple listeners in the event/ directory, aswell as subscribe to multiple events with one listener.
 
 ### Template Event
 
