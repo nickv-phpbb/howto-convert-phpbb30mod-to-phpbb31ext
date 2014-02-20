@@ -211,6 +211,8 @@ In this example my **controller/main.php** would look like the following:
 		}
 	}
 
+**Note:** The consecution of arguments in services.yml should match the consecution of arguments passed to the class constructor public function __construct(). Otherwise, error will be thrown and the board will be broken if you try to enable the extension.
+
 You can also have multiple different methods in one controller aswell as having multiple controllers, in order to organize your code a bit better.
 
 If we now add the entry for our extension into the phpbb_ext table, and go to `example.tld/app.php/newspage/` you can see your template file. **Congratulations!** You just finished the "Hello World" example for phpBB Extensions. ;)
