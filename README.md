@@ -71,7 +71,7 @@ In the `require` section you can also specify other extensions which are require
 		"homepage": "https://github.com/nickvergessen/phpbb3-mod-newspage",
 		"version": "1.1.0",
 		"time": "2013-03-16",
-		"licence": "GPL-2.0",
+		"license": "GPL-2.0",
 		"authors": [
 			{
 				"name": "Joas Schilling",
