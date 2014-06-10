@@ -114,11 +114,11 @@ For the easy start of the newspage, 2 rules are enough. The first rule is for th
 
 
 	newspage_base_controller:
-	    pattern: /newspage/
+	    pattern: /newspage
 	    defaults: { _controller: nickvergessen.newspage.controller:base, page: 1 }
 
 	newspage_page_controller:
-	    pattern: /newspage/{page}/
+	    pattern: /newspage/{page}
 	    defaults: { _controller: nickvergessen.newspage.controller:base }
 	    requirements:
 	        page:  \d+
@@ -592,7 +592,7 @@ Now we add the function which is then called:
 			$this->user->add_lang_ext('nickvergessen/newspage', 'newspage_global');
 
 			$this->template->assign_vars(array(
-				'U_NEWSPAGE'	=> $this->helper->url('newspage'),
+				'U_NEWSPAGE'	=> $this->helper->route('newspage_base_controller'),
 			));
 		}
 
@@ -657,12 +657,18 @@ The old pagination code was similar to:
 
 The new code should look like:
 
-
-		$base_url = $this->helper->url('newspage');
-		phpbb_generate_template_pagination($this->template, $base_url, 'pagination', '/page/%d', $total_paginated, $this->config['news_number'], $start);
+		$pagination = $phpbb_container->get('pagination');
+		$pagination->generate_template_pagination(
+			array(
+				'routes' => array(
+					'newspage_base_controller',
+					'newspage_page_controller',
+				),
+				'params' => array(),
+			), 'pagination', 'page', $total_paginated, $this->config['news_number'], $start);
 
 		$this->template->assign_vars(array(
-			'PAGE_NUMBER'		=> phpbb_on_page($this->template, $this->user, $base_url, $total_paginated, $this->config['news_number'], $start),
+			'PAGE_NUMBER'		=> $pagination->on_page($total_paginated, $this->config['news_number'], $start),
 			'TOTAL_NEWS'		=> $this->user->lang('VIEW_TOPIC_POSTS', $total_paginated),
 		));
 
