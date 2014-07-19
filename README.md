@@ -82,10 +82,12 @@ In the `require` section you can also specify other extensions which are require
 		],
 		"require": {
 			"php": ">=5.3",
-			"phpbb/phpbb": "3.1.*@dev"
 		},
 		"extra": {
 			"display-name": "phpBB 3.1 NV Newspage Extension"
+			"soft-require": {
+				"phpbb/phpbb": ">=3.1.0-RC2,<3.2.*@dev"
+			}
 		}
 	}
 
